@@ -35,6 +35,7 @@ class wall:
 # мы сразу создаем объекты get_rect, чтобы быть готовыми их blit'ить.
 
 # Walls:
+# здесь создаются экземпляры стенок
 wall_surface = pygame.display.set_mode((800, 800)).copy()
 wall_rect = wall_surface.get_rect(center=(400, 400))
 wa0 = wall(wall_surface, 15, 300, 700, 100, 50)
@@ -50,6 +51,7 @@ wa3.draw()
 dog_surface = pygame.display.set_mode((800, 800)).copy()
 dog_surface.set_colorkey((255, 255, 255))
 dog_rect = dog_surface.get_rect(center=(0, 0))
+
 #   Body:
 ellipse(dog_surface, GREY, [110, 460, 180, 90])
 ellipse(dog_surface, GREY, [220, 450, 100, 70])
@@ -63,6 +65,7 @@ ellipse(dog_surface, GREY, [95, 485, 45, 110])
 ellipse(dog_surface, GREY, [65, 580, 60, 20])
 ellipse(dog_surface, GREY, [180, 510, 45, 110])
 ellipse(dog_surface, GREY, [150, 605, 60, 20])
+
 #    Head:
 rect(dog_surface, GREY, [100, 450, 80, 80])
 rect(dog_surface, BLACK, [100, 450, 80, 80], 1)
@@ -98,7 +101,7 @@ dog_3_rect = dog_surface.get_rect(center=(500, 380))
 dog_4_surface = pygame.transform.scale2x(dog_surface.copy())
 dog_4_rect = dog_4_surface.get_rect(center=(1200, 500))
 
-#Dog house:
+# Dog house:
 house_surface = pygame.display.set_mode((800, 800)).copy()
 house_rect = house_surface.get_rect(center=(400, 400))
 polygon(house_surface, YELLOW, [[600, 420], [520, 480], [640, 545]])
@@ -111,7 +114,7 @@ polygon(house_surface, YELLOW, [[640, 545], [680, 525], [680, 595], [640, 635]])
 polygon(house_surface, BLACK, [[640, 545], [680, 525], [680, 595], [640, 635]], 1)
 circle(house_surface, BLACK, [575, 555], 25)
 
-#chain:
+# chain:
 chain_surface = pygame.display.set_mode((800, 800)).copy()
 chain_rect = chain_surface.get_rect(center=(400, 400))
 chain_surface.set_colorkey((255, 255, 255))
