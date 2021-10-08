@@ -22,7 +22,8 @@ glob_t = 0
 points = 0
 
 def new_ball(x, y, r, velx, vely):
-    '''рисует новый шарик '''
+    ''' задает параметры нового шарика
+    '''
     dic = {}
     dic['x'] = x
     dic['y'] = y
@@ -38,8 +39,18 @@ def move_ball(dt):
     dic['x'] += dic['velx']
     dic['y'] += dic['vely']
     dic['t'] += dt
+    if dic['x'] <= dic['r']:
+        dic['velx'] *= -1
+    if dic['x'] >= WIDTH - dic['r']:
+        dic['velx'] *= -1
+    if dic['y'] <= dic['r']:
+        dic['vely'] *= -1
+    if dic['y'] >= HEIGHT - dic['r']:
+        dic['vely'] *= -1
+    
 
 def click(event):
+    '''функция, возвращающая'''
     return(event.pos)
     
 clock = pygame.time.Clock()
@@ -51,15 +62,18 @@ while not finished:
     if glob_t % 15 == 0:
         list_of_dics.append(new_ball(random.randint(100, 1100), random.randint(100, 800), random.randint(30, 50), random.randint(-6, 6), random.randint(-6, 6)))
     clock.tick(FPS)
-    hit_marker = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
         if event.type == pygame.MOUSEBUTTONDOWN:
-            x_mouse, y_mouse = click(event)
+            x_mouse, y_mouse = click(event)        
+            for dic in list_of_dics:
+                if (x_mouse - dic['x']) ** 2 + (y_mouse - dic['y']) ** 2 <= r ** 2 + 1:
+                    list_of_dics.remove(dic)
+                    points += 5 * (abs(dic['velx']) + abs(dic['vely'])) + 3 * (70 - dic['r'])
 
 
-    for dic in list_of_dics:
+    for dic in list_of_dics:     
         cur_x, cur_y, r = dic['x'], dic['y'], dic['r']
         move_ball(dt)
         circle(screen, dic['color'], (cur_x, cur_y), r)
@@ -69,5 +83,5 @@ while not finished:
     pygame.display.update()
     screen.fill(BLACK)
     glob_t += 1
-
+print(points)
 pygame.quit()
