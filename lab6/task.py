@@ -40,7 +40,10 @@ def new_ball(x, y, r, velx, vely):
     return dic
 
 def move_ball(dt):
-    ''' функция, двигающая шарик каждую итерацию цикла '''
+    ''' функция, двигающая шарик каждую итерацию цикла
+        dt позволяет считать время и по прошествии определенного числа
+        просто удалять шарик.
+     '''
     dic['x'] += dic['velx']
     dic['y'] += dic['vely']
     dic['t'] += dt
@@ -55,7 +58,7 @@ def move_ball(dt):
 
 def new_square(x, y, velx, vely, when_spawned):
     ''' функция, которая создает движущийся квадратик, при нажатии на который, он каждый раз
-        увеличивает свою скорость в 2 раза, появляется squares_spawned раз во время игры в случайные моменты
+        увеличивает свою скорость, появляется squares_spawned раз во время игры в случайные моменты
         времени на square_lives секунд.
     '''
     dic = {}
@@ -67,15 +70,14 @@ def new_square(x, y, velx, vely, when_spawned):
     dic['t'] = 0
     dic['color'] = YELLOW
     dic['when'] = when_spawned
+    dic['times_clicked'] = 0
     return dic
 
-def move_square(dt, times_clicked=1):
+def move_square(dt):
     ''' функция, двигающая квадратик '''
     dic['x'] += dic['velx']
     dic['y'] += dic['vely']
     dic['t'] += dt
-    dic['velx'] *= times_clicked
-    dic['vely'] *= times_clicked
     if dic['x'] <= 0:
         dic['velx'] *= -1
     if dic['x'] >= WIDTH - dic['a']:
@@ -112,11 +114,17 @@ while not finished:
                 if (x_mouse - dic['x']) ** 2 + (y_mouse - dic['y']) ** 2 <= dic['r'] ** 2 + 1:
                     list_of_dics.remove(dic)
                     points += 5 * (abs(dic['velx']) + abs(dic['vely'])) + 3 * (70 - dic['r'])
+            for dic in list_of_squares:
+                if (abs(x_mouse - dic['x']) <= dic['a']) and (abs(y_mouse - dic['y']) <= dic['a']):
+                    dic['times_clicked'] += 1
+                    dic['velx'] *= 1.1 ** dic['times_clicked']
+                    dic['vely'] *= 1.1 ** dic['times_clicked']
+                    points += 300
 
     for dic in list_of_squares:
         if global_time >= dic['when'] * 30:
             rect(screen, dic['color'], [dic['x'], dic['y'], dic['a'], dic['a']])
-            move_square(dt, 1)
+            move_square(dt)
             if dic['t'] >= square_lives * 30:
                 list_of_squares.remove(dic)
 
