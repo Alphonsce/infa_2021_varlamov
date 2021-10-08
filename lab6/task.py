@@ -18,7 +18,7 @@ BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 dt = 1
-glob_t = 0
+global_time = 0
 points = 0
 
 def new_ball(x, y, r, velx, vely):
@@ -50,7 +50,7 @@ def move_ball(dt):
     
 
 def click(event):
-    '''функция, возвращающая'''
+    '''функция, возвращающая координаты указателя мыши'''
     return(event.pos)
     
 clock = pygame.time.Clock()
@@ -59,11 +59,11 @@ list_of_dics = []
 list_of_dics.append(new_ball(random.randint(100, 1100), random.randint(100, 800), random.randint(30, 50), random.randint(-6, 6), random.randint(-6, 6)))
 
 while not finished:
-    if glob_t % 15 == 0:
+    if global_time % 15 == 0:
         list_of_dics.append(new_ball(random.randint(100, 1100), random.randint(100, 800), random.randint(30, 50), random.randint(-6, 6), random.randint(-6, 6)))
     clock.tick(FPS)
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT or global_time >= 30 * 60:
             finished = True
         if event.type == pygame.MOUSEBUTTONDOWN:
             x_mouse, y_mouse = click(event)        
@@ -79,9 +79,21 @@ while not finished:
         circle(screen, dic['color'], (cur_x, cur_y), r)
         if dic['t'] >= 60:
             list_of_dics.remove(dic)
-        
+
+    # создание Surface с текстом
+    font = pygame.font.Font('freesansbold.ttf', 22)
+    text = font.render(f'Score: {points}', True, GREEN, BLUE)
+    text1 = font.render(f'Time left: {60 - global_time // 30}', True, GREEN, BLUE)
+    textRect = text.get_rect()
+    text1Rect = text.get_rect()
+    textRect.center = (WIDTH // 16, HEIGHT // 16)
+    text1Rect.center = (WIDTH * 14 // 16, HEIGHT // 16)
+    screen.blit(text, textRect)
+    screen.blit(text1, text1Rect)    
     pygame.display.update()
     screen.fill(BLACK)
-    glob_t += 1
-print(points)
+
+    global_time += 1
+
+
 pygame.quit()
