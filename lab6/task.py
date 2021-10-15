@@ -1,5 +1,6 @@
 import pygame
 import random
+import pathlib
 from pygame.draw import *
 pygame.init()
 
@@ -20,12 +21,16 @@ COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 dt = 1
 global_time = 0
 points = 0
-time_game_lasts = 30
-squares_spawned = 5
+time_game_lasts = 5
+squares_spawned = 3
 square_lives = 5
+leaderboard = []
 
-# writing_f = open('results.txt', mode='rt')
-# reading_f = open('results.txt', mode='rt')
+name = input('Введите имя, чтобы начать: ')
+# создания файлов для записи таблицы лидеров
+
+reading_f = open('write_lead.txt', mode='rt')
+writing_f = open('write_lead.txt', mode='a')
 
 def new_ball(x, y, r, velx, vely):
     ''' задает параметры нового шарика '''
@@ -148,5 +153,43 @@ while not finished:
     screen.fill(BLACK)
 
     global_time += 1
+
+# запись в файл
+line = name + ': ' + str(points)
+writing_f.write(name + ': ' + str(points) + '\n')
+writing_f.close()
+
+# считывание лидеров из файла для записи на экран:
+already_played = len(reading_f.readlines())
+reading_f.seek(0)
+for _ in range(already_played):
+    leaderboard.append(reading_f.readline().strip())
+leaderboard = sorted(leaderboard, key=lambda x: int(x.split()[-1]), reverse=True)
+
+# отображение таблицы лидеров:
+finished = False
+while not finished:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            finished = True
+    font = pygame.font.Font('freesansbold.ttf', 22)
+    text = font.render(f'Leaderboards:', True, BLUE)
+    text0 = font.render(leaderboard[0], True, GREEN)
+    text1 = font.render(leaderboard[1], True, GREEN)
+    text2 = font.render(leaderboard[2], True, GREEN)
+    textRect = text.get_rect()
+    text0Rect = text.get_rect()
+    text1Rect = text.get_rect()
+    text2Rect = text.get_rect()
+    textRect.center = (WIDTH // 2, HEIGHT // 16)
+    text0Rect.center = (WIDTH  // 2, HEIGHT // 10)
+    text1Rect.center = (WIDTH  // 2, HEIGHT // 10 + 100)
+    text2Rect.center = (WIDTH  // 2, HEIGHT // 10 + 200)
+    screen.blit(text, textRect)
+    screen.blit(text0, text0Rect)
+    screen.blit(text1, text1Rect)
+    screen.blit(text2, text2Rect)    
+    pygame.display.update()
+    
 
 pygame.quit()
