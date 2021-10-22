@@ -1,3 +1,5 @@
+# working version with moving surfaces in the targets
+
 import math
 import random
 import pygame
@@ -150,9 +152,8 @@ class Target:
         self.r = random.randint(2, 50)
         self.vx = random.randint(-2, 2)
         self.vy = random.randint(-2, 2)
-        self.target_surf = pygame.Surface((self.x + self.r, self.y + self.r))
-        self.target_surf = self.target_surf.convert_alpha()
-        self.target_surf.fill((0, 0, 0, 0))
+        self.target_surf = pygame.Surface((2 * self.r, 2 * self.r))
+        self.target_surf.fill(WHITE)
         self.color = random.choice(GAME_COLORS)
 
 
@@ -167,7 +168,6 @@ class Target:
     def move_target(self):
         self.x += self.vx
         self.y += self.vy
-        self.target_surf.fill(BLACK)
 
         if self.x >= WIDTH - self.r:
             self.vx *= -1
@@ -186,8 +186,8 @@ class Target:
         self.target_surf.fill(WHITE)
 
     def draw(self):
-        pygame.draw.circle(self.target_surf, self.color, [self.x, self.y], self.r)
-        screen.blit(self.target_surf, self.target_surf.get_rect())
+        pygame.draw.circle(self.target_surf, self.color, [self.r, self.r], self.r)
+        screen.blit(self.target_surf, (self.x - self.r, self.y - self.r))
 
 
 pygame.init()
@@ -195,18 +195,19 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 clock = pygame.time.Clock()
 
-target = Target()
-target1 = Target()
-targets = [target, target1]
+targets = []
+for new_target in range(2):
+    new_target = Target()
+    targets.append(new_target)
 gun = Gun(screen, 20, 450)
 
 finished = False
 
 while not finished:
     screen.fill(WHITE)
+    gun.draw()
     for tar in targets:
         tar.draw()
-    gun.draw()
     for b in balls:
         b.draw()
     pygame.display.update()
