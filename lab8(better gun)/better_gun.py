@@ -1,11 +1,11 @@
 # working version with moving surfaces in the targets
 # straight flying squares added
+# gun can now move up and down
 
 import math
 import random
 import pygame
 import numpy as np
-
 
 FPS = 30
 
@@ -16,7 +16,7 @@ GREEN = 0x00FF00
 MAGENTA = 0xFF03B8
 CYAN = 0x00FFCC
 BLACK = (0, 0, 0)
-WHITE = 0xFFFFFF
+WHITE = (255, 255, 255)
 GREY = 0x7D7D7D
 GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
@@ -27,8 +27,10 @@ bullet = 0
 balls = []
 squares = []
 
+gun_y = 450
+
 class Ball:
-    def __init__(self, screen: pygame.Surface, x=40, y=450):
+    def __init__(self, screen: pygame.Surface, x=40):
         """ Конструктор класса ball
 
         Args:
@@ -37,7 +39,7 @@ class Ball:
         """
         self.screen = screen
         self.x = x
-        self.y = y
+        self.y = gun_y
         self.r = 10
         self.vx = 0
         self.vy = 0
@@ -96,7 +98,6 @@ class Square(Ball):
         self.y = y
         self.a = 20
         self.vx = 0
-        self.vy0 = 2
         self.vy = 0
         self.color = random.choice(GAME_COLORS)
         self.live = FPS * 3
@@ -129,7 +130,7 @@ class Square(Ball):
         )
 
     def hittest(self, other):
-        if abs(self.x - other.x) <= other.r and abs(self.y - other.y) <= other.r:
+        if (self.x + self.a / 2 - other.x) ** 2 + (self.y + self.a / 2 - other.y) ** 2 <= other.r ** 2:
             return True
         return False
    
@@ -153,7 +154,8 @@ class Gun:
         Происходит при отпускании кнопки мыши.
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
         """
-        global balls, bullet
+        global balls, bullet, gun_y
+        gun_y = self.y
         bullet += 1
         new_ball = Ball(self.screen)
         new_ball.r += 5
@@ -175,12 +177,12 @@ class Gun:
         """
         global squares, bullet
         bullet += 1
-        new_ball = Square(self.screen)
-        new_ball.a += 5
-        self.an = math.atan2((event.pos[1]-new_ball.y), (event.pos[0]-new_ball.x))
-        new_ball.vx = self.f2_power * math.cos(self.an)
-        new_ball.vy = self.f2_power * math.sin(self.an)
-        squares.append(new_ball)
+        new_square = Square(self.screen)
+        new_square.a += 5
+        self.an = math.atan2((event.pos[1]-new_square.y), (event.pos[0]-new_square.x))
+        new_square.vx = self.f2_power * math.cos(self.an)
+        new_square.vy = self.f2_power * math.sin(self.an)
+        squares.append(new_square)
         self.f2_on = 0
         self.f2_power = 10
 
@@ -194,12 +196,12 @@ class Gun:
             self.color = GREY
 
     def draw(self):
-        gun_surf1 = pygame.Surface((200, 200))
-        gun_surf1.fill(WHITE)
-        pygame.draw.rect(gun_surf1, self.color, [100, 95, 40 + self.f2_power / 2, 10])
-        gun_surf1 = pygame.transform.rotate(gun_surf1, - self.an * 180 / 3.14)
-        gun_surf_rect = gun_surf1.get_rect()
-        screen.blit(gun_surf1, (self.x - gun_surf_rect.width / 2, self.y - gun_surf_rect.height / 2))
+        gun_surf = pygame.Surface((200, 200))
+        gun_surf.fill(WHITE)
+        pygame.draw.rect(gun_surf, self.color, [100, 95, 40 + self.f2_power / 2, 10])
+        gun_surf = pygame.transform.rotate(gun_surf, - self.an * 180 / 3.14)
+        gun_surf_rect = gun_surf.get_rect()
+        screen.blit(gun_surf, (self.x - gun_surf_rect.width / 2, self.y - gun_surf_rect.height / 2))
         
 
     def power_up(self):
@@ -209,6 +211,12 @@ class Gun:
             self.color = RED
         else:
             self.color = GREY
+
+    def move_gun_up(self):
+        self.y -= 1
+
+    def move_gun_down(self):
+        self.y += 1
 
 
 class Target:
@@ -255,6 +263,23 @@ class Target:
         pygame.draw.circle(self.target_surf, self.color, [self.r, self.r], self.r)
         screen.blit(self.target_surf, (self.x - self.r, self.y - self.r))
 
+
+def draw_text():
+    ''' функция для рисования текста 
+    '''
+    font = pygame.font.Font('freesansbold.ttf', 14)
+    text = font.render('Press "1" to fire with circles, Press "2" to fire with squares', True, BLACK)
+    text1 = font.render('Use "up and down" keys to move a gun ', True, BLACK)
+
+    textRect = text.get_rect()
+    textRect1= text1.get_rect()
+
+    textRect.center = (WIDTH // 3.75, HEIGHT // 17)
+    textRect1.center = (WIDTH // 5.3, HEIGHT // 11)
+
+    screen.blit(text, textRect)
+    screen.blit(text1, textRect1)
+
 # ------
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -274,6 +299,7 @@ time = 0
 
 while not finished:
     screen.fill(WHITE)
+    draw_text()
     gun.draw()
     for tar in targets:
         tar.draw()
@@ -282,8 +308,8 @@ while not finished:
     for sq in squares:
         sq.draw()
     pygame.display.update()
-
     clock.tick(FPS)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
@@ -328,9 +354,15 @@ while not finished:
         if sq.live <= 0:
             squares.remove(sq)
 
-
     for tar in targets:
         tar.move_target()
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_UP]: 
+        gun.move_gun_up()
+    if keys[pygame.K_DOWN]:
+        gun.move_gun_down()
+
     gun.power_up()
     time += 1
 
